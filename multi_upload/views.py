@@ -37,23 +37,22 @@ class ImageResizeView(APIView):
                 except OSError:
                     img.save(os.path.join(output_folder, filename + ".png"))
         return Response({"message": "Images resized successfully"})
-    
+
 
 class DetailUserApiView(ListAPIView):
     parser_class = [MultiPartParser, FormParser]
     serializer_class = ProductSerializers
 
     def get_queryset(self):
-        user = self.kwargs['user_id']
+        user = self.kwargs["user_id"]
         queryset = Restaurant.objects.filter(user_id=user)
         return queryset
-    
+
 
 class DetailAllApiView(ListAPIView):
     parser_class = [MultiPartParser, FormParser]
     queryset = Restaurant.objects.all()
     serializer_class = ProductSerializers
-
 
 
 class UserCreateAPI(CreateAPIView):
@@ -66,14 +65,14 @@ class DetailUserApiView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    
-@api_view(['GET'])
+
+@api_view(["GET"])
 def apiOverview(request):
     api_urls = {
-    'Create' : 'api/create',
-    'Detail/user' : 'api/detail/<int:user_id>',
-    'Detail/all' : 'api/detail',
-    'Create User' : 'api/create_user',
-    'Resize' : 'api/resize_image',
+        "Create": "api/create",
+        "Detail/user": "api/detail/<int:user_id>",
+        "Detail/all": "api/detail",
+        "Create User": "api/create_user",
+        "Resize": "api/resize_image",
     }
     return Response(api_urls)

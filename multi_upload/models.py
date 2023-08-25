@@ -1,6 +1,6 @@
+import os
 from django.db import models
 from django.contrib.auth.models import User
-
 
 
 class Restaurant(models.Model):
@@ -9,21 +9,16 @@ class Restaurant(models.Model):
     description = models.CharField(max_length=255, blank=False)
     price = models.DecimalField(max_digits=7, decimal_places=2)
 
-
     def __str__(self):
         return self.name
 
 
 def user_directory_path(instance, filename):
-    return '{0}/{1}'.format(instance.product.user.username, filename)
+    return "{0}/{1}".format(instance.product.user.username, filename)
 
 
 class Images(models.Model):
-    product = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='images')
+    product = models.ForeignKey(
+        Restaurant, on_delete=models.CASCADE, related_name="images"
+    )
     image = models.FileField(upload_to=user_directory_path)
-
-
-    def __str__(self):
-        return self.product.name
-    
-
