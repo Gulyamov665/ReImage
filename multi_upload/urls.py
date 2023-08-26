@@ -1,7 +1,6 @@
 from django.urls import path
 from .views import ProductCreateView, ImageResizeView, DetailAllApiView, UserCreateAPI, DetailUserApiView, apiOverview
 
-
 urlpatterns = [
     path("", apiOverview, name="api_overview"),
     path("api/create", ProductCreateView.as_view(), name="create"),
