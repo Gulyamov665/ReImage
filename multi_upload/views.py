@@ -6,9 +6,10 @@ from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser
-from multi_upload.models import Restaurant
-from multi_upload.serializers import ProductSerializers, UserSerializer
+from multi_upload.models import Images, Restaurant
+from multi_upload.serializers import ProductSerializers
 from django.contrib.auth.models import User
+from rest_framework.viewsets import ModelViewSet
 
 
 class ProductCreateView(CreateAPIView):
@@ -18,19 +19,19 @@ class ProductCreateView(CreateAPIView):
 
 class ImageResizeView(APIView):
     def post(self, request):
-        prod = list(Restaurant.objects.all())
-        namer = request.data.get("res")
-        user = request.user
-        print(namer, "dsfsdfdsafdsafdsafdsafds")
+        result = request.data.get("res")
         res_width = 1500
-        input_folder = os.path.join(settings.MEDIA_ROOT, str(namer))
-        output_folder = os.path.join(settings.MEDIA_ROOT,  str(namer))
+        input_folder = os.path.join(settings.MEDIA_ROOT, str(result))
+        output_folder = os.path.join(settings.MEDIA_ROOT, "output", str(result))
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
         name = 0
 
         for file in os.listdir(input_folder):
             name += 1
             filename = str(name)
-            if file.endswith(".jpg") or file.endswith(".png"):
+            files = (".jpg", ".png", ".jpeg", ".webp", ".jfif")
+            if file.endswith(files):
                 img = Image.open(os.path.join(input_folder, file))
                 wpercent = res_width / float(img.size[0])
                 hsize = int((float(img.size[1]) * float(wpercent)))
@@ -41,6 +42,12 @@ class ImageResizeView(APIView):
                     img.save(os.path.join(output_folder, filename + ".png"))
 
         return Response({"message": "Images resized successfully"})
+
+
+class ImagesApiView(ModelViewSet):
+    queryset = Images.objects.all()
+    parser_class = [MultiPartParser, FormParser]
+    serializer_class = ProductSerializers
 
 
 class DetailUserApiView(ListAPIView):
@@ -57,17 +64,6 @@ class DetailAllApiView(ListAPIView):
     parser_class = [MultiPartParser, FormParser]
     queryset = Restaurant.objects.all()
     serializer_class = ProductSerializers
-
-
-class UserCreateAPI(CreateAPIView):
-    parser_class = [MultiPartParser, FormParser]
-    serializer_class = UserSerializer
-
-
-class DetailUserApiView(ListAPIView):
-    parser_class = [MultiPartParser, FormParser]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
 
 @api_view(["GET"])

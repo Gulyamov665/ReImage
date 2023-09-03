@@ -13,7 +13,7 @@ class ImageSerializers(serializers.ModelSerializer):
 class ProductSerializers(serializers.ModelSerializer):
     images = ImageSerializers(many=True, read_only=True)
     uploaded_images = serializers.ListField(
-        child=serializers.ImageField(allow_empty_file=False, use_url=False),
+        child=serializers.ImageField(allow_empty_file=True, use_url=True),
         write_only=True,
     )
 
@@ -39,7 +39,7 @@ class ProductSerializers(serializers.ModelSerializer):
         return product
 
 
-class UserSerializer(serializers.ModelSerializer):
+class ImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ["username", "email", "password"]
+        model = Images
+        fields = ["image", "title", "price", "description"]
