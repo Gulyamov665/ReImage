@@ -24,4 +24,4 @@ class Images(models.Model):
     image = models.FileField(upload_to=user_directory_path, blank=True)
     img_title = models.CharField(max_length=100, null=True)
     img_price = models.PositiveIntegerField(null=True)
-    img_description = models.TextField(null=True)
+    img_description = models.TextField(blank=True, null=True)
