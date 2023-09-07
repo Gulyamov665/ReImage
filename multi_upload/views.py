@@ -1,5 +1,7 @@
 import os
+import zipfile
 from PIL import Image
+from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.generics import CreateAPIView, ListAPIView
@@ -64,6 +66,18 @@ class DetailAllApiView(ListAPIView):
     parser_class = [MultiPartParser, FormParser]
     queryset = Restaurant.objects.all()
     serializer_class = ProductSerializers
+
+
+class DownloadFilesView(APIView):
+    def get(self, request, name):
+        response = HttpResponse(content_type="application/zip")
+        response["Content-Disposition"] = "attachment; filename=files.zip"
+
+        with zipfile.ZipFile(response, "w") as zf:
+            for filename in os.listdir(os.path.join("media/output", name)):
+                zf.write(os.path.join("media/output", name, filename), filename)
+
+        return response
 
 
 @api_view(["GET"])

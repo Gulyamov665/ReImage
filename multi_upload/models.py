@@ -6,8 +6,7 @@ from django.contrib.auth.models import User
 class Restaurant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=150, blank=False)
-    description = models.CharField(max_length=255, blank=False)
-    price = models.DecimalField(max_digits=7, decimal_places=2)
+    description = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return self.name
@@ -23,5 +22,5 @@ class Images(models.Model):
     )
     image = models.FileField(upload_to=user_directory_path, blank=True)
     img_title = models.CharField(max_length=100, null=True)
-    img_price = models.PositiveIntegerField(null=True)
+    img_price = models.PositiveIntegerField(blank=True,null=True)
     img_description = models.TextField(blank=True, null=True)

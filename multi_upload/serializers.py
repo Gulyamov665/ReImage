@@ -11,15 +11,24 @@ class ImageSerializers(serializers.ModelSerializer):
 
 
 class ProductSerializers(serializers.ModelSerializer):
-    images = ImageSerializers(many=True, read_only=True)
+    images = ImageSerializers(many=True, read_only=True, allow_null=True)
     uploaded_images = serializers.ListField(
         child=serializers.FileField(allow_empty_file=True, use_url=True),
         write_only=True,
     )
     title = serializers.ListField(child=serializers.CharField(), write_only=True)
-    img_price = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+    img_price = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+    )
     img_desc = serializers.ListField(
-        child=serializers.CharField(allow_blank=False), write_only=True
+        child=serializers.CharField(
+            allow_blank=True,
+            allow_null=True,
+            required=False,
+        ),
+        write_only=True,
+        allow_empty=True,
     )
 
     class Meta:
@@ -29,7 +38,6 @@ class ProductSerializers(serializers.ModelSerializer):
             "user",
             "name",
             "description",
-            "price",
             "images",
             "uploaded_images",
             "title",
@@ -45,9 +53,9 @@ class ProductSerializers(serializers.ModelSerializer):
         product = Restaurant.objects.create(**validated_data)
 
         for i, image in enumerate(uploaded_images):
-            title = titles[i] if i < len(titles) else "None"
-            price = prices[i] if i < len(titles) else 0
-            desc = img_descriptions[i] if i < len(img_descriptions) else "None"
+            title = titles[i] if i < len(titles) or i <= 0 else "None"
+            price = prices[i] if i < len(prices) or i <= 0 else 0
+            desc = img_descriptions[i] if i < len(img_descriptions) or i <= 0 else ""
             Images.objects.create(
                 product=product,
                 image=image,
@@ -57,7 +65,9 @@ class ProductSerializers(serializers.ModelSerializer):
             )
 
         return product
-print(ImageSerializers())
+
+
+
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
