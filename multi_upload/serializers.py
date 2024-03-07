@@ -1,13 +1,45 @@
 from rest_framework import serializers
 from PIL import Image
-from .models import Images, Restaurant
+from .models import Images, Restaurant, PromoSticker, VendorImage
 from django.contrib.auth.models import User
+from rest_framework.response import Response
 
 
 class ImageSerializers(serializers.ModelSerializer):
     class Meta:
         model = Images
         fields = "__all__"
+
+
+class VendorImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VendorImage
+        fields = "__all__"
+
+
+class PromoSerializers(serializers.ModelSerializer):
+    vendor_image = VendorImagesSerializer(many=True, read_only=True, allow_null=True)
+    origin_images = serializers.ListField(
+        child=serializers.FileField(allow_empty_file=True, use_url=True),
+        write_only=True,
+        required=False
+    )
+
+    class Meta:
+        model = PromoSticker
+        fields = ["vendor_image", "origin_images","vendor", "promo_image"]
+
+    def create(self, validated_data):
+        origin_images = validated_data.pop("origin_images")
+        promo_id = PromoSticker.objects.create(**validated_data)
+
+        for image_data in origin_images:
+            VendorImage.objects.create(
+                vendor_image=image_data,
+                promo=promo_id
+            )
+
+        return promo_id
 
 
 class ProductSerializers(serializers.ModelSerializer):
@@ -29,6 +61,7 @@ class ProductSerializers(serializers.ModelSerializer):
         ),
         write_only=True,
         allow_empty=True,
+        required=False,
     )
 
     class Meta:
@@ -49,7 +82,7 @@ class ProductSerializers(serializers.ModelSerializer):
         uploaded_images = validated_data.pop("uploaded_images")
         titles = validated_data.pop("title")
         prices = validated_data.pop("img_price")
-        img_descriptions = validated_data.pop("img_desc")
+        img_descriptions = validated_data.pop("img_desc", [])
         product = Restaurant.objects.create(**validated_data)
 
         for i, image in enumerate(uploaded_images):
@@ -67,9 +100,8 @@ class ProductSerializers(serializers.ModelSerializer):
         return product
 
 
-
-
 class ImageSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Images
         fields = ["image", "img_title", "img_price", "img_description"]
