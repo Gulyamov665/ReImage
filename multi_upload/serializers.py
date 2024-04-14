@@ -3,6 +3,7 @@ from PIL import Image
 from .models import Images, Restaurant, PromoSticker, VendorImage
 from django.contrib.auth.models import User
 from rest_framework.response import Response
+from multi_upload.models import Vendor, Tag, VendorImages
 
 
 class ImageSerializers(serializers.ModelSerializer):
@@ -22,31 +23,32 @@ class PromoSerializers(serializers.ModelSerializer):
     origin_images = serializers.ListField(
         child=serializers.FileField(allow_empty_file=True, use_url=True),
         write_only=True,
-        required=False
+        required=False,
     )
 
     class Meta:
         model = PromoSticker
-        fields = ["vendor_image", "origin_images","vendor", ]
+        fields = [
+            "vendor_image",
+            "origin_images",
+            "vendor",
+        ]
 
     def create(self, validated_data):
         origin_images = validated_data.pop("origin_images")
-        promo_id = PromoSticker.objects.get(id=73)
+        promo_id = PromoSticker.objects.create(**validated_data)
 
         for image_data in origin_images:
-            VendorImage.objects.create(
-                vendor_image=image_data,
-                promo=promo_id
-            )
+            VendorImage.objects.create(vendor_image=image_data, promo=promo_id)
 
         return promo_id
-    
 
 
 class Promo(serializers.ModelSerializer):
     class Meta:
         model = PromoSticker
         fields = ["id", "vendor", "promo_image"]
+
 
 class ProductSerializers(serializers.ModelSerializer):
     images = ImageSerializers(many=True, read_only=True, allow_null=True)
@@ -113,3 +115,38 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = ["image", "img_title", "img_price", "img_description"]
 
         img_title = serializers.CharField()
+
+
+class TagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"
+
+
+class VendorImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VendorImages
+        fields = "__all__"
+
+
+class VendorSerializer(serializers.ModelSerializer):
+    vendors_images = VendorImagesSerializer(many=True, read_only=True, allow_null=True)
+    uploaded_images = serializers.ListField(
+        child=serializers.ImageField(allow_empty_file=True, use_url=True),
+        write_only=True,
+    )
+    vendor_tag = TagsSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Vendor
+        fields = ["id", "name", "vendors_images", "uploaded_images", "vendor_tag"]
+
+    def create(self, validated_data):
+        uploaded_images = validated_data.pop("uploaded_images")
+        vendor_id = Vendor.objects.create(**validated_data)
+        for image in uploaded_images:
+            VendorImages.objects.create(
+                images=image,
+                vendor=vendor_id,
+            )
+        return vendor_id
