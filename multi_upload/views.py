@@ -11,9 +11,9 @@ from rest_framework.views import APIView
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from multi_upload.models import Images, Restaurant, PromoSticker, VendorImage
-from multi_upload.serializers import ProductSerializers, PromoSerializers
+from multi_upload.serializers import ProductSerializers, PromoSerializers, Promo
 from django.contrib.auth.models import User
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 
 class ProductCreateView(CreateAPIView):
@@ -146,11 +146,12 @@ class PromoStickerView(ModelViewSet):
     def sticker(self, request):
         name_path = request.data.get("vendor")
 
-        promo_folder = os.path.join(settings.MEDIA_ROOT, f"{name_path}/sticker")
+        promo_folder = os.path.join(settings.MEDIA_ROOT, f"stickers")
         origin_folder = os.path.join(settings.MEDIA_ROOT, f"{name_path}/origin")
         output_folder = os.path.join(settings.MEDIA_ROOT, f"{name_path}/with_tag")
         os.makedirs(output_folder, exist_ok=True)
         os.makedirs(origin_folder, exist_ok=True)
+
 
         for image_name in os.listdir(origin_folder):
             original_image = Image.open(f"{origin_folder}/{image_name}")
@@ -190,6 +191,8 @@ class PromoStickerView(ModelViewSet):
         return response
 
 
+
+
         
 
 class VendorImageViews(ModelViewSet):
@@ -197,13 +200,9 @@ class VendorImageViews(ModelViewSet):
     serializer_class = PromoSerializers
     parser_classes = [JSONParser]
 
-# class DownloadFilesView(APIView):
-#     def get(self, request, name):
-#         response = HttpResponse(content_type="application/zip")
-#         response["Content-Disposition"] = "attachment; filename=files.zip"
 
-#         with zipfile.ZipFile(response, "w") as zf:
-#             for filename in os.listdir(os.path.join("media/output", name)):
-#                 zf.write(os.path.join("media/output", name, filename), filename)
 
-#         return response
+
+class PromoView(ReadOnlyModelViewSet):
+    queryset = PromoSticker.objects.all()
+    serializer_class = Promo

@@ -27,11 +27,11 @@ class PromoSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = PromoSticker
-        fields = ["vendor_image", "origin_images","vendor", "promo_image"]
+        fields = ["vendor_image", "origin_images","vendor", ]
 
     def create(self, validated_data):
         origin_images = validated_data.pop("origin_images")
-        promo_id = PromoSticker.objects.create(**validated_data)
+        promo_id = PromoSticker.objects.get(id=73)
 
         for image_data in origin_images:
             VendorImage.objects.create(
@@ -40,7 +40,13 @@ class PromoSerializers(serializers.ModelSerializer):
             )
 
         return promo_id
+    
 
+
+class Promo(serializers.ModelSerializer):
+    class Meta:
+        model = PromoSticker
+        fields = ["id", "vendor", "promo_image"]
 
 class ProductSerializers(serializers.ModelSerializer):
     images = ImageSerializers(many=True, read_only=True, allow_null=True)

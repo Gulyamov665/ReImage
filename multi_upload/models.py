@@ -39,7 +39,7 @@ class Images(models.Model):
 
 class PromoSticker(models.Model):
     vendor = models.CharField(max_length=100)
-    promo_image = models.ImageField(upload_to=sticker_directory_path)
+    promo_image = models.ImageField(upload_to="stickers")
 
 
 
@@ -48,4 +48,7 @@ class VendorImage(models.Model):
     vendor = models.CharField(max_length=155, null=True, blank=True)
     vendor_image = models.FileField(upload_to=origin_directory_path,null=True, blank=True)
     promo = models.ForeignKey(PromoSticker, on_delete=models.CASCADE, related_name="vendor_image", null=True, blank=True)
+
+
+
 

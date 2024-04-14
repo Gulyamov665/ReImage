@@ -9,7 +9,8 @@ from .views import (
     ImagesApiView,
     export_xlsx,
     PromoStickerView,
-    VendorImageViews
+    VendorImageViews,
+    PromoView
 )
 
 
@@ -24,6 +25,7 @@ urlpatterns = [
     path("api/detail", DetailAllApiView.as_view(), name="detail"),
     path("api/detail_user", DetailUserApiView.as_view(), name="detail_user"),
     path("api/sticker", PromoStickerView.as_view({"post":"sticker"}), name="sticker"),
+    path("api/stick", PromoView.as_view({"get":"list"}), name="sticker"),
     path("api/sticker/create", PromoStickerView.as_view({"post":"create"}), name="sticker-create"),
     path("api/sticker/<str:name>", PromoStickerView.as_view({"get":"download"}), name="sticker-download"),
     path("api/vendor/create", VendorImageViews.as_view({"post":"create"}), name="vendor-create"),
